@@ -1,9 +1,24 @@
-# Claude code config
+# Claude Code Config
 
-This is my Claude Code config setup to keep it unified across my workstations.
-This will contain skills and workflows
+Unified Claude Code config across Mac and Ubuntu workstations.
+
+## Setup
+
+```bash
+git clone https://github.com/0xobat/claude.git
+cd claude
+./install.sh
+```
 
 ## Structure
 
-- skills
-- statusline.sh
+```
+├── install.sh                 # Installs everything to ~/.claude/
+├── settings.json              # Preferences, enabled plugins, env vars
+├── statusline.sh              # Custom status line
+└── skills/
+    ├── coding-session/        # One-feature-per-session workflow
+    ├── initialize-project/    # Harness bootstrapping
+    ├── marketing/             # Marketing skill suite
+    └── social/                # Social media skills
+```
