@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-CLAUDE_DIR="$HOME/.claude"
+# Re-register marketplace and reinstall custom skill plugins
+claude plugin marketplace add 0xobat/claude-skills 2>/dev/null || true
 
-# Remove all local skills, then copy fresh from repo
-rm -rf "$CLAUDE_DIR/skills"
-cp -r "$REPO_DIR/skills" "$CLAUDE_DIR/skills"
+for plugin in dev marketing social creative startup; do
+  claude plugin install "$plugin@0xobat-skills" 2>/dev/null || true
+done
 
-echo "✓ Skills synced to $CLAUDE_DIR/skills/"
+echo "✓ Skill plugins synced"

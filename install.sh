@@ -7,7 +7,6 @@ CLAUDE_DIR="$HOME/.claude"
 echo "Installing Claude Code config from $REPO_DIR"
 
 # --- Prereqs ---
-mkdir -p "$CLAUDE_DIR/skills"
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "Warning: 'jq' not found. statusline.sh requires it."
@@ -22,15 +21,6 @@ echo "✓ settings.json"
 cp "$REPO_DIR/statusline.sh" "$CLAUDE_DIR/statusline-command.sh"
 echo "✓ statusline-command.sh"
 
-# --- Skills ---
-rm -rf "$CLAUDE_DIR/skills/dev" "$CLAUDE_DIR/skills/marketing" "$CLAUDE_DIR/skills/social" "$CLAUDE_DIR/skills/creative" "$CLAUDE_DIR/skills/startup"
-cp -r "$REPO_DIR/skills/dev" "$CLAUDE_DIR/skills/"
-cp -r "$REPO_DIR/skills/marketing" "$CLAUDE_DIR/skills/"
-cp -r "$REPO_DIR/skills/social" "$CLAUDE_DIR/skills/"
-cp -r "$REPO_DIR/skills/creative" "$CLAUDE_DIR/skills/"
-cp -r "$REPO_DIR/skills/startup" "$CLAUDE_DIR/skills/"
-echo "✓ skills"
-
 # --- Marketplaces & Plugins ---
 if ! command -v claude >/dev/null 2>&1; then
   echo "Warning: 'claude' CLI not found. Skipping marketplace and plugin setup."
@@ -43,6 +33,7 @@ claude plugin marketplace add anthropics/skills 2>/dev/null || echo "  anthropic
 claude plugin marketplace add anthropics/claude-plugins-official 2>/dev/null || echo "  claude-plugins-official already added"
 claude plugin marketplace add perplexityai/modelcontextprotocol 2>/dev/null || echo "  perplexity already added"
 claude plugin marketplace add railwayapp/railway-skills 2>/dev/null || echo "  railway already added"
+claude plugin marketplace add 0xobat/claude-skills 2>/dev/null || echo "  0xobat-skills already added"
 echo "✓ marketplaces"
 
 echo "Installing plugins..."
@@ -77,6 +68,12 @@ plugins=(
   "example-skills@anthropic-agent-skills"
   # Third-party
   "perplexity@perplexity-mcp-server"
+  # Custom skills
+  "dev@0xobat-skills"
+  "marketing@0xobat-skills"
+  "social@0xobat-skills"
+  "creative@0xobat-skills"
+  "startup@0xobat-skills"
 )
 
 for plugin in "${plugins[@]}"; do

@@ -11,7 +11,7 @@ Portable Claude Code configuration repository. Stores skills, workflows, and set
 - `install.sh` — Deploys config to `~/.claude/`, registers marketplaces, installs plugins
 - `settings.json` — Preferences, enabled plugins, env vars (uses `__HOME__` placeholder)
 - `statusline.sh` — Custom status line (requires `jq`)
-- `skills/` — Custom Claude Code skill definitions (YAML frontmatter + markdown)
+- `{dev,marketing,social,creative,startup}/` — Custom skill plugins (this repo is the `0xobat-skills` marketplace)
 
 ## Conventions
 

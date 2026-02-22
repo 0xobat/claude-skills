@@ -33,7 +33,12 @@
     "posthog@claude-plugins-official": true,
     "firecrawl@claude-plugins-official": true,
     "example-skills@anthropic-agent-skills": true,
-    "perplexity@perplexity-mcp-server": true
+    "perplexity@perplexity-mcp-server": true,
+    "dev@0xobat-skills": true,
+    "marketing@0xobat-skills": true,
+    "social@0xobat-skills": true,
+    "creative@0xobat-skills": true,
+    "startup@0xobat-skills": true
   },
   "alwaysThinkingEnabled": true,
   "skipDangerousModePermissionPrompt": true

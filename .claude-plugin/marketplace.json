@@ -1,0 +1,12 @@
+{
+  "name": "0xobat-skills",
+  "description": "Personal skill plugins",
+  "owner": { "name": "obat" },
+  "plugins": [
+    { "name": "dev", "source": "./dev", "version": "1.0.0" },
+    { "name": "marketing", "source": "./marketing", "version": "1.0.0" },
+    { "name": "social", "source": "./social", "version": "1.0.0" },
+    { "name": "creative", "source": "./creative", "version": "1.0.0" },
+    { "name": "startup", "source": "./startup", "version": "1.0.0" }
+  ]
+}
