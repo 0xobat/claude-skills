@@ -4,18 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-Portable Claude Code configuration repository. Stores skills, workflows, and settings to maintain a uniform Claude Code setup across Mac and Ubuntu workstations. Deployed via `./install.sh`.
+Claude Code plugin marketplace (`0xobat-skills`). Each top-level directory is a plugin containing skills.
 
 ## Structure
 
-- `install.sh` — Deploys config to `~/.claude/`, registers marketplaces, installs plugins
-- `settings.json` — Preferences, enabled plugins, env vars (uses `__HOME__` placeholder)
-- `statusline.sh` — Custom status line (requires `jq`)
-- `{dev,marketing,social,creative,startup}/` — Custom skill plugins (this repo is the `0xobat-skills` marketplace)
+- `.claude-plugin/marketplace.json` — Marketplace manifest
+- `{dev,marketing,social,creative,startup}/` — Plugins, each with `.claude-plugin/plugin.json` and `skills/`
+- `install.sh` — Registers marketplace and installs all plugins
 
 ## Conventions
 
-- All configuration must be cross-platform compatible (macOS and Ubuntu/Linux)
-- Shell scripts use `#!/usr/bin/env bash`
-- Never commit secrets, credentials, or machine-specific absolute paths — use `__HOME__` placeholder where paths are needed
 - Skills follow the Claude Code skill format (YAML frontmatter with `name`, `description`, and `---` delimiters)
+- Each plugin has a `.claude-plugin/plugin.json` with name, description, version, and author

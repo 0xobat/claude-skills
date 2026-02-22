@@ -1,23 +1,30 @@
-# Claude Code Config
+# 0xobat-skills
 
-Unified Claude Code config across Mac and Ubuntu workstations.
+Claude Code plugin marketplace with custom skills.
 
-## Setup
+## Install
 
 ```bash
-git clone https://github.com/0xobat/claude.git
-cd claude
 ./install.sh
 ```
 
-## Structure
+Or manually:
 
+```bash
+claude plugin marketplace add 0xobat/claude-skills
+claude plugin install dev@0xobat-skills
+claude plugin install marketing@0xobat-skills
+claude plugin install social@0xobat-skills
+claude plugin install creative@0xobat-skills
+claude plugin install startup@0xobat-skills
 ```
-├── install.sh                 # Installs everything to ~/.claude/
-├── settings.json              # Preferences, enabled plugins, env vars
-├── statusline.sh              # Custom status line
-└── skills/
-    ├── dev/                   # Development workflow skills
-    ├── marketing/             # Marketing skill suite
-    └── social/                # Social media skills
-```
+
+## Plugins
+
+| Plugin | Skills |
+|--------|--------|
+| `dev` | coding-session, initialize-project, manage-features, recover-session |
+| `marketing` | brand-voice, content-atomizer, direct-response-copy, email-sequences, keyword-research, lead-magnet, newsletter, orchestrator, positioning-angles, seo-content |
+| `social` | x-algorithm-optimizer |
+| `creative` | ai-creative-strategist, ai-image-generation, ai-product-photo, ai-product-video, ai-social-graphics, ai-talking-head |
+| `startup` | startup-secrets-cvp |
