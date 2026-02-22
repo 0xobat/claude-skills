@@ -23,10 +23,8 @@ cp "$REPO_DIR/statusline.sh" "$CLAUDE_DIR/statusline-command.sh"
 echo "✓ statusline-command.sh"
 
 # --- Skills ---
-rm -rf "$CLAUDE_DIR/skills/coding-session" "$CLAUDE_DIR/skills/initialize-project"
-rm -rf "$CLAUDE_DIR/skills/marketing" "$CLAUDE_DIR/skills/social"
-cp -r "$REPO_DIR/skills/coding-session" "$CLAUDE_DIR/skills/"
-cp -r "$REPO_DIR/skills/initialize-project" "$CLAUDE_DIR/skills/"
+rm -rf "$CLAUDE_DIR/skills/dev" "$CLAUDE_DIR/skills/marketing" "$CLAUDE_DIR/skills/social"
+cp -r "$REPO_DIR/skills/dev" "$CLAUDE_DIR/skills/"
 cp -r "$REPO_DIR/skills/marketing" "$CLAUDE_DIR/skills/"
 cp -r "$REPO_DIR/skills/social" "$CLAUDE_DIR/skills/"
 echo "✓ skills"

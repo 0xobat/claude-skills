@@ -17,8 +17,7 @@ cd claude
 ├── settings.json              # Preferences, enabled plugins, env vars
 ├── statusline.sh              # Custom status line
 └── skills/
-    ├── coding-session/        # One-feature-per-session workflow
-    ├── initialize-project/    # Harness bootstrapping
+    ├── dev/                   # Development workflow skills
     ├── marketing/             # Marketing skill suite
     └── social/                # Social media skills
 ```
