@@ -23,10 +23,12 @@ cp "$REPO_DIR/statusline.sh" "$CLAUDE_DIR/statusline-command.sh"
 echo "✓ statusline-command.sh"
 
 # --- Skills ---
-rm -rf "$CLAUDE_DIR/skills/dev" "$CLAUDE_DIR/skills/marketing" "$CLAUDE_DIR/skills/social"
+rm -rf "$CLAUDE_DIR/skills/dev" "$CLAUDE_DIR/skills/marketing" "$CLAUDE_DIR/skills/social" "$CLAUDE_DIR/skills/creative" "$CLAUDE_DIR/skills/startup"
 cp -r "$REPO_DIR/skills/dev" "$CLAUDE_DIR/skills/"
 cp -r "$REPO_DIR/skills/marketing" "$CLAUDE_DIR/skills/"
 cp -r "$REPO_DIR/skills/social" "$CLAUDE_DIR/skills/"
+cp -r "$REPO_DIR/skills/creative" "$CLAUDE_DIR/skills/"
+cp -r "$REPO_DIR/skills/startup" "$CLAUDE_DIR/skills/"
 echo "✓ skills"
 
 # --- Marketplaces & Plugins ---
