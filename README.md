@@ -4,19 +4,28 @@ Claude Code plugin marketplace with custom skills.
 
 ## Install
 
-```bash
-./install.sh
+### Claude Code (via Plugin Marketplace)
+
+Register the marketplace first:
+
+```
+/plugin marketplace add 0xobat/claude-skills
 ```
 
-Or manually:
+Then install plugins:
+
+```
+/plugin install dev@0xobat-skills
+/plugin install marketing@0xobat-skills
+/plugin install social@0xobat-skills
+/plugin install creative@0xobat-skills
+/plugin install startup@0xobat-skills
+```
+
+### Script
 
 ```bash
-claude plugin marketplace add 0xobat/claude-skills
-claude plugin install dev@0xobat-skills
-claude plugin install marketing@0xobat-skills
-claude plugin install social@0xobat-skills
-claude plugin install creative@0xobat-skills
-claude plugin install startup@0xobat-skills
+./install.sh
 ```
 
 ## Plugins
@@ -41,7 +50,7 @@ Recommended flow for the `dev` skills:
 
 ### Recommended Companion Plugins
 
-Install [superpowers](https://github.com/anthropics/claude-code-superpowers) for skills that pair well with `dev`:
+Install [superpowers](https://github.com/obra/superpowers) for skills that pair well with `dev`:
 
 - `/security-review` — audit code for vulnerabilities before merging
 - `/code-review` — review PRs against plan and coding standards
