@@ -4,6 +4,10 @@ Claude Code plugin marketplace with custom skills.
 
 ## Install
 
+```bash
+./install.sh
+```
+
 ### Claude Code (via Plugin Marketplace)
 
 Register the marketplace first:
@@ -22,11 +26,7 @@ Then install plugins:
 /plugin install startup@0xobat-skills
 ```
 
-### Script
-
-```bash
-./install.sh
-```
+> **Note:** Plugin marketplace is a Claude Code feature.
 
 ## Plugins
 
