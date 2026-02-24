@@ -4,6 +4,8 @@ Claude Code plugin marketplace with custom skills.
 
 ## Install
 
+> **Note:** Plugin marketplace is a Claude Code feature.
+
 ```bash
 ./install.sh
 ```
@@ -26,17 +28,15 @@ Then install plugins:
 /plugin install startup@0xobat-skills
 ```
 
-> **Note:** Plugin marketplace is a Claude Code feature.
-
 ## Plugins
 
-| Plugin | Skills |
-|--------|--------|
-| `dev` | coding-session, initialize-project, manage-features, onboard, recover-session, team-lead |
+| Plugin      | Skills                                                                                                                                                         |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dev`       | coding-session, initialize-project, manage-features, onboard, recover-session, team-lead                                                                       |
 | `marketing` | brand-voice, content-atomizer, direct-response-copy, email-sequences, keyword-research, lead-magnet, newsletter, orchestrator, positioning-angles, seo-content |
-| `social` | x-algorithm-optimizer |
-| `creative` | ai-creative-strategist, ai-image-generation, ai-product-photo, ai-product-video, ai-social-graphics, ai-talking-head |
-| `startup` | startup-secrets-cvp |
+| `social`    | x-algorithm-optimizer                                                                                                                                          |
+| `creative`  | ai-creative-strategist, ai-image-generation, ai-product-photo, ai-product-video, ai-social-graphics, ai-talking-head                                           |
+| `startup`   | startup-secrets-cvp                                                                                                                                            |
 
 ## Dev Workflow
 
