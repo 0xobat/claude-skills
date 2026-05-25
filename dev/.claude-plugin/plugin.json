@@ -1,6 +1,6 @@
 {
   "name": "dev",
-  "description": "Development workflow skills — session management, project initialization, and feature tracking",
-  "version": "1.0.0",
+  "description": "Development workflow skills — design sessions, implementation sessions, feature management, parallel agent orchestration, and recovery — built around a lightweight docs-first convention",
+  "version": "2.0.0",
   "author": { "name": "obat" }
 }
