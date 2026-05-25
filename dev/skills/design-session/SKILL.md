@@ -1,6 +1,6 @@
 ---
 name: design-session
-description: Use when starting a new initiative or major feature that needs upfront design before any coding. Triggers when the user says "design session", "new initiative", "let's design", "plan a feature", "set up <project>", or describes a feature/system that doesn't exist yet. Drives an interactive Q&A + research session that produces docs/<initiative>/design.md and docs/<initiative>/features.json — the artifacts an implementation session will consume. Replaces the older initialize-project skill.
+description: Use when starting a new initiative or major feature that needs upfront design before any coding. Triggers when the user says "design session", "new initiative", "let's design", "plan a feature", "set up <project>", or describes a feature/system that doesn't exist yet. Drives an interactive Q&A + research session that produces docs/<initiative>/design.md and docs/<initiative>/features.json — the artifacts an implementation session will consume.
 ---
 
 # Design Session

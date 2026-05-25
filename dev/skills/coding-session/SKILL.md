@@ -1,255 +1,142 @@
 ---
 name: coding-session
-description: Use when starting work on features in a harness-based project. Triggers when user says "work on feature", "implement", "let's start coding", or references a feature ID (F001, F002). Enforces the session ritual (read progress, one feature, verify before/after, update progress, commit) and prevents batching multiple features.
+description: Use when starting work on a feature from a docs-first initiative. Triggers when the user says "work on feature", "implement", "let's start coding", or references a feature ID (F001, F002). Enforces the one-feature-per-session ritual — read context, verify baseline, implement, verify again, update progress, commit.
 ---
 
 # Coding Session
 
 ## Overview
 
-Follow the Anthropic long-running agent ritual for feature work. **One feature per session** - this is non-negotiable for maintaining quality and clear handoffs.
+One feature per session. Read context, verify baseline, implement, verify again, document, commit. The discipline is what keeps the project shippable across sessions — without it, work compounds into untested mush.
 
-**Core principle:** Each session picks ONE feature, implements it completely, verifies it works, and leaves clear handoff notes. No shortcuts, no batching.
+Assumes the docs-first layout: `docs/<initiative>/{design.md, features.json, progress.md}`. See `workflow-convention.md` at the repo root.
 
 ## When to Use
 
-Use this skill when:
-- Starting work on a feature (user says "implement F003", "work on...")
-- User references a feature ID from features.json
-- Beginning a coding session on a harness-based project
+- Implementing a feature from `docs/<initiative>/features.json`
+- User says "implement F003", "work on the next feature", etc.
+- Beginning a coding session on an existing initiative
 
-Do NOT use for:
-- Initial project setup (use initialize-project skill)
+## When Not to Use
+
+- Initial design (use design-session)
 - Exploratory research without a specific feature target
-- Emergency hotfixes (though ritual still recommended)
+- Cross-cutting refactors (split into features first via manage-features)
 
-## The Session Ritual
+## The Ritual
 
-Follow this order exactly. Each step has a purpose.
+### 1. Orient — read context
 
-### 1. Orient: Read progress.txt (Required)
-
-**Before touching ANY code**, read `harness/progress.txt`.
-
-Why this matters:
-- Understand what previous sessions accomplished
-- Learn from past decisions and blockers
-- Avoid duplicating work or breaking patterns
-- Get context on dependencies between features
-
-**Red flag:** "I'll just start coding, progress.txt is optional"
-**Reality:** Skipping context causes rework and breaks existing patterns
-
-### 2. Select: Pick ONE Feature (The Iron Law)
-
-Open `harness/features.json` and find the next `"passes": false` feature.
-
-**The Rule: ONE feature per session. No exceptions.**
-
-Why?
-- Clear scope prevents feature creep
-- Verification is meaningful (not testing 5 things at once)
-- Handoff notes are specific (not vague summaries of bulk work)
-- Failures are traceable (know exactly what broke)
-- Sustainable pace (marathon, not sprint)
-
-**Common rationalizations:**
-
-| Excuse | Reality |
-|--------|---------|
-| "These 3 features are related, batching is efficient" | Related features share bugs. Implement one, verify, then build on solid foundation. |
-| "I can do F001-F005 quickly" | "Quickly" = untested. One feature done right > five features done poorly. |
-| "User wants multiple features" | User wants working features. One passing feature > three broken ones. |
-| "I'm on a roll, let's keep going" | Momentum without verification = accumulating technical debt. |
-
-### 3. Establish Baseline: Run verify.sh BEFORE Coding
-
-**Before writing ANY implementation code**, run `harness/verify.sh`.
+Before touching any code:
 
 ```bash
-cd project-root
-./harness/verify.sh
-# Note the exit code and output
+cat docs/<initiative>/progress.md | tail -40
+cat docs/<initiative>/design.md
+cat docs/<initiative>/features.json
+git log --oneline -10
 ```
 
-Why?
-- Confirms project starts in passing state
-- Establishes blame boundary (if tests fail after your work, you know you broke it)
-- Reveals existing issues before you add new code
+You want to know: what was done last, what's coming next, what constraints the design fixed.
 
-**Red flag:** "Tests pass, I don't need to run them"
-**Reality:** You THINK tests pass. Verify it. Takes 30 seconds.
+### 2. Pick ONE feature
 
-### 4. Implement: Write Code for ONE Feature
+Open `features.json`, find the next `"passes": false` feature whose `depends` are all satisfied. That's your feature.
 
-Read the feature description in `features.json` carefully:
-- What does "done" look like for this specific feature?
-- What are the explicit steps listed?
-- Are there dependencies on other features?
+**One feature per session. No exceptions.**
 
-Write:
-- Implementation code
-- Tests (if feature requires new tests)
-- Documentation (if feature adds public API)
+Why: clear scope, meaningful verification, traceable failures, sustainable pace. "These three features are related, I'll batch them" produces three half-tested features and one shared bug.
 
-**Scope control:** If you realize the feature is too large during implementation, STOP. Split it into smaller features in `features.json`, then implement just the first piece.
+### 3. Verify baseline
 
-### 5. Verify: Run verify.sh AFTER Implementation
+Run the project's verify command before writing any implementation code:
 
 ```bash
-./harness/verify.sh
-# MUST exit 0 or feature is NOT done
+pnpm check-types && pnpm build   # or pnpm test, cargo test, pytest — whatever the project uses
 ```
 
-**Feature is NOT done until verify.sh exits 0.**
+This is the blame boundary — if it passes now and fails after your work, you broke it. If it fails now, stop and recover (see recover-session) before adding more code on top of broken state.
 
-If verify.sh fails:
-- Fix the implementation
-- Re-run verify.sh
-- Repeat until exit 0
+### 4. Implement
 
-**Do NOT:**
-- Mark feature as passing when tests fail
-- Skip verify.sh "just this once"
-- Commit broken code with TODO comments
+Read your feature's `description` and `steps` carefully. What does "done" look like for this specific feature?
 
-### 6. Update State: Mark Feature as Passing
+Write the code, tests, docs if needed.
 
-Only after verify.sh exits 0:
+**Scope control:** if the feature turns out too big during implementation, stop. Split it (see manage-features), then implement only the first piece.
 
-Edit `harness/features.json`:
+### 5. Verify after
+
+Run the same command. **Must pass.**
+
+```bash
+pnpm check-types && pnpm build
+```
+
+If it fails: fix and re-run until it passes. Don't mark the feature done with failing checks.
+
+### 6. Update features.json
+
+Set your feature's `passes` to `true`:
+
 ```json
-{
-  "id": "F003",
-  "description": "Risk management and position sizing",
-  "passes": true  // Change from false to true
-}
+{ "id": "F003", "description": "...", "passes": true }
 ```
 
-### 7. Document: Update progress.txt
+**Only change the `passes` field for your one feature.** Don't touch anything else in `features.json`.
 
-Append to `harness/progress.txt` (do NOT edit previous entries):
+### 7. Append to progress.md
 
+Add a session entry. **Do not edit previous entries** — this is an append-only log.
+
+```markdown
+## Session YYYY-MM-DD-NN
+
+- **Agent:** <model>
+- **Completed:** F003 — risk management & position sizing
+  - Position sizer based on account balance
+  - Stop-loss / take-profit validation
+  - Test suite covering edge cases
+- **Blocked:** none
+- **Next:** F004 — backtesting framework (depends on F003)
+- **Commit:** feat(<initiative>): implement risk management (F003)
 ```
---- Session 2026-02-16-02 ---
-Agent: Claude Sonnet 4.5
-Worked on: F003 - Risk management and position sizing
-Completed:
-  - Implemented position size calculator based on account balance
-  - Added stop-loss and take-profit validation
-  - Created test suite covering edge cases (zero balance, negative positions)
-  - All tests passing via verify.sh
-Blocked: none
-Next: F004 - Backtesting framework (depends on F003 risk calculations)
-Commit: feat(ai-bot-alchemy): implement risk management (F003)
-```
 
-**Required fields:**
-- Session header with date
-- "Worked on" - what feature(s)
-- "Completed" - specific accomplishments
-- "Blocked" - anything preventing progress
-- "Next" - what should happen in next session
-- "Commit" - the commit message used (or pending)
-
-### 8. Commit: Save Work with Conventional Message
+### 8. Commit
 
 ```bash
 git add .
-git commit -m "feat(project): implement feature description (F00X)
-
-- Specific changes made
-- Tests added/updated
-- Any notable decisions
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+git commit -m "feat(<initiative>): <description> (<ID>)"
 ```
 
-**Commit message format:**
-- Type: `feat` (new), `fix` (bug), `refactor`, `test`, `docs`
-- Scope: `(project-name)` matching directory
-- Description: concise summary with feature ID
-- Body: bullet points for details
-- Co-Authored-By: attribute AI contribution
+Conventional message format: `feat` / `fix` / `refactor` / `test` / `docs` + scope + description with feature ID.
 
-## When Feature is "Done"
+## A Feature Is Done When
 
-A feature is complete when ALL of these are true:
+All of these are true:
 
-- [ ] verify.sh exits 0
-- [ ] features.json updated (`"passes": true`)
-- [ ] progress.txt appended with session summary
-- [ ] Code committed with conventional message
-- [ ] No TODO comments or stub implementations
-- [ ] Tests cover the feature (if tests required)
+- [ ] Verify command passes
+- [ ] `features.json` has `"passes": true` for this feature
+- [ ] `progress.md` has a session entry
+- [ ] Code is committed with a conventional message
+- [ ] No TODO comments or stub implementations left behind
+- [ ] Manually exercised the feature end-to-end — not just relying on the verify command
 
-**If ANY checkbox is unchecked, the feature is NOT done.**
-
-## Common Mistakes & Rationalizations
-
-| Excuse | Reality | Counter |
-|--------|---------|---------|
-| "I'll update progress.txt later" | "Later" = never. Next session has no context. | Takes 2 minutes now. Do it before ending session. |
-| "These features are tiny, I can batch them" | Tiny features accumulate. One broken feature contaminates batch. | Even tiny features deserve individual verification and commits. |
-| "verify.sh passed before, no need to re-run" | Code changed. Tests might fail now. | Re-run takes 30 seconds. Skipping risks broken code. |
-| "Feature mostly works, I'll mark it passing" | "Mostly" = failing. Partial features create false progress. | Finish the feature or leave `"passes": false`. Be honest. |
-| "I'll commit all my changes together later" | Bulk commits lose history. Hard to debug/revert. | Commit per feature. Clear history, easy rollback. |
-
-## Red Flags - STOP and Reconsider
-
-If you're thinking any of these, you're cutting corners:
-
-- "Let me just knock out a few features"
-- "I'll update progress.txt in the next session"
-- "verify.sh can wait until I'm done with all features"
-- "These features are related, batching makes sense"
-- "The user wants fast progress"
-- "I'm on a roll, let's keep coding"
-
-**All of these mean: Slow down. Follow the ritual.**
+If any box is unchecked, the feature is not done.
 
 ## Edge Cases
 
-### Feature Turns Out Too Large
+**Feature too large.** Stop. Split it via manage-features. Implement only the first piece. Document the split in `progress.md`.
 
-If during implementation you realize the feature is too big:
+**Feature blocked.** Stop. Set `"blocked_by": "..."` in `features.json`. Document in `progress.md` under "Blocked:". Commit any exploratory work as `chore(<initiative>): investigate F003 blocker`. Tell the user.
 
-1. STOP implementation
-2. Update features.json - split the feature into smaller pieces
-3. Implement ONLY the first piece
-4. Document in progress.txt: "Split F003 into F003a/F003b due to scope"
-5. Next session picks up F003b
+**User insists on multiple features in one session.** Push back: batching risks bugs we won't catch until later. If overridden, document the deviation in `progress.md`.
 
-### Feature is Blocked
+## Don't
 
-If you discover a blocker (missing dependency, unclear requirements):
-
-1. STOP implementation
-2. Document in progress.txt under "Blocked:"
-3. Leave `"passes": false` in features.json
-4. Commit any exploratory work with message: `chore(project): investigate F003 blocker`
-5. Communicate blocker to user
-
-### User Insists on Multiple Features
-
-Push back respectfully:
-
-"I understand you want F003, F004, and F005. The one-feature-per-session rule exists to maintain quality. Let me complete F003 properly with full verification, then we can tackle F004 in the next turn. Batching risks introducing bugs we won't catch until later."
-
-If user overrides: document in progress.txt that you deviated from convention and why.
-
-## Why This Ritual Matters
-
-The ritual prevents three failure modes:
-
-1. **Context loss** - progress.txt enables clean handoffs between sessions
-2. **Quality decay** - verify.sh before/after catches regressions immediately
-3. **Scope creep** - one feature per session maintains sustainable pace
-
-Skip any step and you risk introducing bugs, losing context, or burning out.
-
-## Real-World Impact
-
-**Without this discipline:** Agents attempt to "finish" projects in one massive session, skip testing, forget to document, and leave the next session with no idea what happened or why tests fail.
-
-**With this discipline:** Each session makes measurable progress on one feature, leaves passing tests, provides clear handoff notes. Project progresses steadily over weeks instead of chaotic sprints that collapse.
+- **Don't skip the orient step.** "Progress.md is optional" leads to duplicating work and breaking patterns the previous session established.
+- **Don't batch features.** Even tiny features deserve individual verification and a clean commit. Five batched features = five untested features.
+- **Don't skip verify before coding.** Takes 30 seconds; reveals existing issues and sets your blame boundary.
+- **Don't mark a feature passing when the verify command fails.** "Mostly works" = failing. Be honest in `features.json` or you create false progress.
+- **Don't commit everything in one bulk commit at the end.** Per-feature commits give you clean history and easy rollback.
+- **Don't edit previous entries in `progress.md`.** It's append-only on purpose — the audit trail breaks otherwise.
+- **Don't trust the verify command alone.** It checks structure; you still need to exercise the feature like a user would.

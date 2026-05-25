@@ -1,200 +1,158 @@
 ---
 name: recover-session
-description: Use when verify.sh fails repeatedly, a feature breaks unrelated code, or the project is in a bad state. Triggers when user says "tests are failing", "something broke", "revert", "recover", or "rollback". Provides a structured protocol for diagnosing failures, isolating regressions, and restoring the project to a known good state using git.
+description: Use when the project's verify command fails after a feature lands, a change broke unrelated code, or you inherited a project in a failing state. Triggers on "tests are failing", "something broke", "revert", "recover", "rollback". Provides a structured diagnose-isolate-fix protocol that uses git deliberately rather than nuking work.
 ---
 
 # Recover Session
 
 ## Overview
 
-Structured error recovery for harness-based projects. When verify.sh fails and you can't immediately see why, **follow this protocol instead of flailing.** Git is your safety net — use it deliberately.
+When the verify command fails and you can't immediately see why, follow this protocol instead of flailing. Git is your safety net — use it deliberately.
 
-**Core principle:** Diagnose before you fix. Isolate before you revert. Never lose working code to fix broken code.
+**Diagnose before you fix. Isolate before you revert. Never lose working code to fix broken code.**
+
+See `workflow-convention.md` for the docs-first layout this skill assumes.
 
 ## When to Use
 
-Use this skill when:
-- verify.sh fails after implementing a feature
+- The verify command fails after implementing a feature
 - A change broke unrelated features (regression)
-- You inherit a project in a failing state (previous session left it broken)
-- You need to revert to last known good state
+- You inherited a project where the previous session left things broken
+- You need to roll back to a known good state
 - Tests pass locally but the feature doesn't actually work
 
-Do NOT use for:
-- Normal verify.sh failures during active implementation (just fix the code)
-- Initial project setup issues (use initialize-project skill)
-- Feature work (use coding-session skill)
+## When Not to Use
 
-## The Recovery Protocol
+- Normal verify failures during active implementation — just fix the code
+- Initial project setup issues (use design-session)
+- Feature work (use coding-session)
 
-Follow this order. Do NOT skip to "just revert everything."
+## The Protocol
 
-### 1. Stop and Assess
+### 1. Stop and assess
 
-**Before touching ANY code**, gather information:
+Before touching any code, gather information:
 
 ```bash
 # What's actually failing?
-./harness/verify.sh 2>&1 | tee /tmp/verify-output.txt
+pnpm check-types && pnpm build 2>&1 | tee /tmp/verify-output.txt  # or the project's verify command
 
 # What changed since last known good state?
 git log --oneline -10
 git diff --stat HEAD~1
 
-# What does progress.txt say about last session?
-cat harness/progress.txt | tail -30
+# What does progress.md say?
+cat docs/<initiative>/progress.md | tail -30
 ```
 
-**Write down (or note mentally):**
-- Which specific tests/checks fail?
+Note (mentally or in scratch):
+- Which specific checks fail?
 - What was the last successful commit?
 - What changed between then and now?
 
-**Red flag:** "I'll just revert everything and start over"
-**Reality:** You'll lose working code. Diagnose first.
+### 2. Identify the blast radius
 
-### 2. Identify the Blast Radius
+| Pattern | Likely cause | Next step |
+|---|---|---|
+| One test or check fails | Bug in the new code | Step 3a |
+| Multiple tests fail, build broken | Structural issue or bad dep | Step 3b |
+| Previously-passing features now fail | Regression from new code | Step 3c |
 
-Determine if the failure is **isolated** or **widespread**:
+### 3a. Fix an isolated failure
 
-**Isolated failure** (one test, one check):
-- Likely a bug in the new code
-- Fix is usually straightforward
-- Proceed to Step 3a
+1. Read the error carefully — what's the actual failure?
+2. Check the file(s) changed in the last commit
+3. Fix
+4. Re-run the verify command
+5. Continue the coding-session ritual (update `progress.md`, commit)
 
-**Widespread failure** (multiple tests, build broken):
-- Likely a structural issue or bad dependency
-- May need rollback
-- Proceed to Step 3b
+**Time limit:** if you can't fix it in 15 minutes of focused effort, escalate to 3b.
 
-**Regression** (previously passing features now fail):
-- New code broke old code
-- Need to isolate the breaking change
-- Proceed to Step 3c
+### 3b. Roll back to last known good state
 
-### 3a. Fix Isolated Failure
-
-For a single failing test or check:
-
-1. Read the error message carefully — what's the actual failure?
-2. Check the specific file(s) changed in the last commit
-3. Fix the issue
-4. Run verify.sh
-5. If fixed, continue with coding-session ritual (update progress, commit)
-
-**Time limit:** If you can't fix it in 15 minutes of focused effort, escalate to 3b.
-
-### 3b. Rollback to Last Known Good State
-
-When the project is too broken to fix forward:
+When forward progress isn't working:
 
 ```bash
 # Find last passing commit
 git log --oneline -20
 
-# Check verify.sh at a specific commit WITHOUT losing current work
+# Check verify at a candidate commit WITHOUT losing current work
 git stash
-git checkout <last-good-commit>
-./harness/verify.sh  # Confirm it actually passes
-git checkout -  # Return to current branch
+git checkout <candidate-commit>
+pnpm check-types && pnpm build   # confirm it actually passes
+git checkout -                   # back to current branch
 git stash pop
 ```
 
-**If last good commit passes:**
+Once you've identified a known good commit:
 
 ```bash
-# Option A: Soft reset (keep changes as unstaged)
-git reset --soft <last-good-commit>
-# Now you can selectively re-apply changes
-
-# Option B: Create a recovery branch (safest)
-git branch recovery-backup  # Save current state
+# Safest: create a recovery branch first
+git branch recovery-backup
 git reset --hard <last-good-commit>
-# Cherry-pick or manually re-apply what worked
+# Re-apply only what worked, deliberately
 ```
 
-**Always document the rollback in progress.txt.**
+Document the rollback in `progress.md`.
 
-### 3c. Isolate Regression with Git Bisect
+### 3c. Isolate a regression with git bisect
 
-When new code broke old code and you're not sure which change caused it:
+When new code broke old code and you're not sure which commit:
 
 ```bash
-# Find the breaking commit
 git bisect start
 git bisect bad HEAD
 git bisect good <last-known-good-commit>
 
-# At each step, run verify.sh
-./harness/verify.sh
-# If passes: git bisect good
-# If fails: git bisect bad
+# At each step:
+pnpm check-types && pnpm build
+# If it passes: git bisect good
+# If it fails:  git bisect bad
 
-# When found:
 git bisect reset
 ```
 
-**After identifying the breaking commit:**
-1. Understand WHY it broke (not just WHAT)
-2. Fix the root cause (don't just revert blindly)
-3. If fix is non-obvious, revert the breaking commit and re-implement properly
+Once you've found the breaking commit:
+1. Understand WHY it broke (not just what)
+2. Fix the root cause — don't just blindly revert
+3. If the fix is non-obvious, revert the breaking commit and re-implement properly
 
-## Progress Documentation
+## Documenting Recovery
 
-After any recovery, append to progress.txt:
+Append to `docs/<initiative>/progress.md`:
 
+```markdown
+## Session 2026-02-22-recovery
+
+- **Agent:** <model>
+- **Worked on:** Recovery — verify failures after F007
+- **Root cause:** F007 migration broke F003 config loader (shared env vars)
+- **Recovery action:** Reverted F007, re-implemented with isolated env namespace
+- **Completed:**
+  - Diagnosed regression with `git bisect` (breaking commit: a3f8b21)
+  - Rolled back to last good state (7c2e1f4)
+  - Re-implemented F007 with namespace isolation
+  - Verify passing
+- **Next:** F008 — API rate limiting
+- **Commit:** fix(<initiative>): re-implement F007 with isolated env namespace
 ```
---- Session 2026-02-22-recovery ---
-Agent: Claude Opus 4.6
-Worked on: Recovery - verify.sh failures after F007 implementation
-Root cause: F007 database migration broke F003 config loader (shared env vars)
-Recovery action: Reverted F007, re-implemented with isolated env namespace
-Completed:
-  - Diagnosed regression using git bisect (breaking commit: a3f8b21)
-  - Rolled back to last good state (commit: 7c2e1f4)
-  - Re-implemented F007 with proper env isolation
-  - All tests passing via verify.sh
-Blocked: none
-Next: F008 - API rate limiting
-Commit: fix(project): re-implement F007 with isolated env namespace
-```
 
-**Required fields for recovery sessions:**
-- "Root cause" — what actually went wrong
-- "Recovery action" — what you did to fix it
-- Standard fields (Worked on, Completed, Blocked, Next, Commit)
+Required for recovery entries: **root cause** and **recovery action**, in addition to the usual fields.
 
-## Common Mistakes & Rationalizations
+## When to Escalate to the User
 
-| Excuse | Reality | Counter |
-|--------|---------|---------|
-| "I'll just revert everything" | Loses working code from multiple sessions | Diagnose first. Surgical revert > nuclear option. |
-| "It worked before, I'll just re-run" | Flaky tests need fixing, not re-running | If verify.sh fails, something is wrong. Investigate. |
-| "Let me add a quick fix on top" | Fixes on top of broken code compound problems | Understand root cause before applying fixes. |
-| "I'll skip the failing test for now" | Skipped tests never get fixed. Quality decay starts here. | Fix the test or revert the code. No middle ground. |
-| "This isn't related to my changes" | It probably is. Check git diff carefully. | If truly unrelated, document it and create a new feature for the fix. |
+Escalate when:
+- You followed the protocol and can't identify root cause
+- The last known good commit also fails (the project itself is broken outside your scope)
+- Recovery would require changes outside the initiative
+- You've spent more than 30 minutes without progress
 
-## Red Flags - STOP and Reconsider
+How to escalate: document everything you tried in `progress.md`, hand the user the failing output, the git log, and a specific question — not "it's broken, what do I do?".
 
-If you're thinking any of these, you're about to make things worse:
+## Don't
 
-- "Let me just try one more thing" (after 3+ failed attempts)
-- "I'll comment out the failing test"
-- "This test is flaky anyway"
-- "I'll fix it in the next session"
-- "Reverting is giving up"
-
-**All of these mean: Step back. Follow the protocol from Step 1.**
-
-## When to Escalate to User
-
-Escalate if:
-- You've followed the full protocol and can't identify root cause
-- The last known good commit also fails (harness itself is broken)
-- Recovery requires changes outside the project scope
-- You've spent more than 30 minutes in recovery without progress
-
-**How to escalate:**
-1. Document everything you've tried in progress.txt
-2. Provide the user with: failing output, git log, what you've tried
-3. Ask specific questions (not "it's broken, what do I do?")
+- **Don't "just revert everything".** You'll lose working code from multiple sessions. Diagnose first, then surgically revert.
+- **Don't add a fix on top of broken state.** Fixes layered on a broken foundation compound problems. Get back to green first, then build.
+- **Don't skip the failing test "for now".** Skipped tests never get fixed. Quality decay starts there. Either fix the test or revert the code that broke it.
+- **Don't re-run hoping the failure is flaky.** If it failed once with no infrastructure cause, it's a real failure. Investigate.
+- **Don't escalate without details.** "It's broken" isn't a question. Bring the failing output, the diff, what you tried, and a specific ask.

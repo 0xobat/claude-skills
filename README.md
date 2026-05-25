@@ -32,7 +32,7 @@ Then install plugins:
 
 | Plugin      | Skills                                                                                                                                                         |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dev`       | coding-session, initialize-project, manage-features, onboard, recover-session, team-lead                                                                       |
+| `dev`       | coding-session, design-session, manage-features, onboard, recover-session, team-lead                                                                           |
 | `marketing` | brand-voice, content-atomizer, direct-response-copy, email-sequences, keyword-research, lead-magnet, newsletter, orchestrator, positioning-angles, seo-content |
 | `social`    | x-algorithm-optimizer                                                                                                                                          |
 | `creative`  | ai-creative-strategist, ai-image-generation, ai-product-photo, ai-product-video, ai-social-graphics, ai-talking-head                                           |
@@ -40,13 +40,15 @@ Then install plugins:
 
 ## Dev Workflow
 
+Adopts the docs-first convention (see `workflow-convention.md` at the repo root): each initiative lives in `docs/<initiative>/` with a `design.md`, `features.json`, and `progress.md`.
+
 Recommended flow for the `dev` skills:
 
-1. `/initialize-project` — bootstrap harness structure
-2. `/manage-features` — define and organize the feature list
-3. `/coding-session` — implement features one at a time
+1. `/design-session` — interactive Q&A + research; produces `docs/<initiative>/design.md` + `features.json`
+2. `/manage-features` — split, add, deprecate, or audit features mid-project
+3. `/coding-session` — implement features one at a time; updates `progress.md`
 4. `/team-lead` — parallelize with agents when 3+ independent features are ready
-5. `/recover-session` — fix things when verify.sh breaks
+5. `/recover-session` — diagnose and fix when the verify command breaks
 
 ### Recommended Companion Plugins
 
