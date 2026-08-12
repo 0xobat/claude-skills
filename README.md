@@ -1,5 +1,7 @@
 # 0xobat-skills
 
+[![Skillselion Top 25](https://skillselion.com/badge/marketplace/0xobat/claude-skills.svg?award=1)](https://skillselion.com/marketplace/0xobat/claude-skills)
+
 Claude Code plugin marketplace with custom skills.
 
 ## Install
